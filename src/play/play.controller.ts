@@ -6,7 +6,6 @@ import { CreateSnippetDto } from './dto/create-snippet.dto';
 import { Snippet } from './schemas/snippet.schema';
 import { SnippetVersion } from './schemas/snippet-version.schema';
 import { AuthService } from '../auth/auth.service';
-import { toNodeHandler } from 'better-auth/node';
 
 @Controller()
 export class PlayController {

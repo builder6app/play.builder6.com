@@ -1,7 +1,6 @@
 import { All, Controller, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { toNodeHandler } from 'better-auth/node';
 
 @Controller('api/auth')
 export class AuthController {
@@ -9,6 +8,7 @@ export class AuthController {
 
   @All('*')
   async handleAuth(@Req() req: Request, @Res() res: Response) {
+    const { toNodeHandler } = await import('better-auth/node');
     return toNodeHandler(this.authService.auth)(req, res);
   }
 }

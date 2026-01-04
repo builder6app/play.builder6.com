@@ -1,6 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { betterAuth } from 'better-auth';
-import { mongodbAdapter } from 'better-auth/adapters/mongodb';
+import type { betterAuth } from 'better-auth';
 import { Db } from 'mongodb';
 
 @Injectable()
@@ -9,7 +8,10 @@ export class AuthService implements OnModuleInit {
 
   constructor(@Inject('DATABASE_CONNECTION') private db: Db) {}
 
-  onModuleInit() {
+  async onModuleInit() {
+    const { betterAuth } = await import('better-auth');
+    const { mongodbAdapter } = await import('better-auth/adapters/mongodb');
+
     this.auth = betterAuth({
       database: mongodbAdapter(this.db),
       user: {
