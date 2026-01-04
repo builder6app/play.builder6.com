@@ -17,4 +17,23 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+
+if (require.main === module) {
+  bootstrap();
+}
+
+export default async (req: any, res: any) => {
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+  );
+
+  const engine = new Liquid();
+  app.engine('liquid', engine.express());
+  app.setViewEngine('liquid');
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+
+  await app.init();
+  const instance = app.getHttpAdapter().getInstance();
+  return instance(req, res);
+};

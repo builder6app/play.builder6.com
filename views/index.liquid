@@ -143,15 +143,30 @@
 
     <script>
         // 1. 默认代码模板
-        const defaultCode = `<div class="min-h-screen bg-gray-100 flex items-center justify-center">
-  <div class="p-8 bg-white shadow-lg rounded-2xl max-w-sm">
-    <div class="flex items-center space-x-4">
-      <div class="shrink-0">
-        <img class="h-12 w-12" src="https://cdn.tailwindcss.com/img/logo.svg" alt="ChitChat Logo">
+        const defaultCode = `<div class="min-h-screen bg-[#000000] flex items-center justify-center font-sans antialiased">
+  <div class="w-80 bg-[#1c1c1e] rounded-[2rem] p-6 shadow-2xl border border-white/10 relative overflow-hidden">
+    <!-- Background Blur Blob -->
+    <div class="absolute top-[-20%] right-[-20%] w-40 h-40 bg-blue-500/30 rounded-full blur-[50px]"></div>
+    
+    <div class="relative z-10 flex flex-col items-center text-center">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 mb-4 shadow-lg flex items-center justify-center text-3xl">
+        🎨
       </div>
-      <div>
-        <div class="text-xl font-medium text-black">ChitChat</div>
-        <p class="text-slate-500">You have a new message!</p>
+      
+      <h2 class="text-white text-xl font-semibold mb-1">Design System</h2>
+      <p class="text-gray-400 text-sm mb-6">Consistent, reusable components for your next project.</p>
+      
+      <button class="w-full py-3 bg-[#007AFF] hover:bg-[#0062cc] text-white rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-blue-900/20">
+        Explore Components
+      </button>
+      
+      <div class="mt-6 flex gap-4">
+        <div class="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer">
+          <span class="text-lg">❤️</span>
+        </div>
+        <div class="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer">
+          <span class="text-lg">📤</span>
+        </div>
       </div>
     </div>
   </div>
