@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Tailwind Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        #editor { width: 100%; height: 100%; }
+    </style>
+</head>
+<body class="flex flex-col h-screen bg-gray-900 text-white">
+
+    <header class="flex items-center justify-between px-6 py-3 border-b border-gray-700 bg-gray-800">
+        <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-sky-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"/></svg>
+            <h1 class="font-bold text-lg tracking-tight">Tailwind Play <span class="text-xs font-normal text-gray-400 ml-1">(Lite)</span></h1>
+        </div>
+        <button id="shareBtn" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded text-sm font-medium transition flex items-center gap-2">
+            <span>分享 / 复制链接</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+        </button>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <div class="w-1/2 border-r border-gray-700 flex flex-col">
+            <div id="editor-container" class="flex-1"></div>
+        </div>
+
+        <div class="w-1/2 bg-white relative">
+            <div class="absolute inset-0 bg-white" id="preview-wrapper">
+                <iframe id="preview" class="w-full h-full border-none"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+    <script>
+        // 1. 默认代码模板
+        const defaultCode = `<div class="min-h-screen bg-gray-100 flex items-center justify-center">
+  <div class="p-8 bg-white shadow-lg rounded-2xl max-w-sm">
+    <div class="flex items-center space-x-4">
+      <div class="shrink-0">
+        <img class="h-12 w-12" src="https://cdn.tailwindcss.com/img/logo.svg" alt="ChitChat Logo">
+      </div>
+      <div>
+        <div class="text-xl font-medium text-black">ChitChat</div>
+        <p class="text-slate-500">You have a new message!</p>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+        let editor;
+
+        // 2. 初始化 Monaco Editor
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        
+        require(['vs/editor/editor.main'], function() {
+            // 解析 URL 中的代码（如果有）
+            const initialCode = getCodeFromUrl() || defaultCode;
+
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: initialCode,
+                language: 'html',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 14,
+                padding: { top: 20 }
+            });
+
+            // 监听内容变化，更新预览
+            editor.onDidChangeModelContent(() => {
+                updatePreview();
+                updateUrl();
+            });
+
+            // 初始化预览
+            updatePreview();
+        });
+
+        // 3. 更新预览 Iframe
+        function updatePreview() {
+            const code = editor.getValue();
+            const previewFrame = document.getElementById('preview');
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            
+            // 构建完整的 HTML 页面，注入 Tailwind CDN
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                </head>
+                <body>
+                    ${code}
+                </body>
+                </html>
+            `;
+            
+            doc.open();
+            doc.write(htmlContent);
+            doc.close();
+        }
+
+        // 4. URL 状态管理 (编码与解码)
+        // 使用 LZString 压缩，避免 URL 过长
+        function updateUrl() {
+            const code = editor.getValue();
+            const compressed = LZString.compressToEncodedURIComponent(code);
+            window.history.replaceState(null, '', '#' + compressed);
+        }
+
+        function getCodeFromUrl() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return null;
+            return LZString.decompressFromEncodedURIComponent(hash);
+        }
+
+        // 5. 分享按钮逻辑
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            updateUrl(); // 确保 URL 是最新的
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btn = document.getElementById('shareBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<span class="text-green-300">已复制!</span>`;
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
