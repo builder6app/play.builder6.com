@@ -6,7 +6,7 @@ import { Snippet, SnippetSchema } from './schemas/snippet.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/play'),
+    MongooseModule.forRoot(process.env.PLAY_MONGODB_URI || 'mongodb://localhost:27017/play'),
     MongooseModule.forFeature([{ name: Snippet.name, schema: SnippetSchema }]),
   ],
   controllers: [AppController],
