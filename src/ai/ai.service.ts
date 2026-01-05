@@ -13,7 +13,7 @@ export class AiService {
     });
   }
 
-  async generateCode(prompt: string, currentCode?: string) {
+  async generateCode(prompt: string, currentCode?: string, model?: string) {
     const systemPrompt = `You are an expert web developer and UI designer. 
     Your task is to generate or modify HTML/Tailwind CSS code based on the user's request.
     
@@ -35,7 +35,7 @@ export class AiService {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      model: process.env.OPENAI_MODEL || 'gpt-4o',
+      model: model || this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
     });
 
     let content = completion.choices[0].message.content || '';
@@ -48,5 +48,28 @@ export class AiService {
     }
 
     return { code: content };
+  }
+
+  async getModels() {
+    try {
+      const list = await this.openai.models.list();
+      // Filter for coding capable models from major providers supported by Vercel AI Gateway
+      const allowedKeywords = [
+        'gpt', 
+        'claude', 
+        'gemini',
+      ];
+      // Also allow any model that might be passed via env or specific ones we know
+      return list.data.filter(m => allowedKeywords.some(am => m.id.toLowerCase().includes(am)));
+    } catch (e) {
+      console.error('Failed to fetch models from OpenAI', e);
+      // Fallback list for Vercel AI Gateway
+      return [
+        { id: 'gpt-4o', object: 'model', created: 0, owned_by: 'openai' },
+        { id: 'anthropic/claude-3-5-sonnet', object: 'model', created: 0, owned_by: 'anthropic' },
+        { id: 'google/gemini-1.5-pro', object: 'model', created: 0, owned_by: 'google' },
+        { id: 'google/gemini-2.0-flash-exp', object: 'model', created: 0, owned_by: 'google' }
+      ];
+    }
   }
 }

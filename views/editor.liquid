@@ -198,10 +198,10 @@
         </div>
 
         <!-- AI Chat Sidebar -->
-        <div id="aiChatSidebar" class="w-96 bg-[#1c1c1e] border-l border-white/10 flex flex-col transition-all duration-300 hidden">
+        <div id="aiChatSidebar" class="w-96 bg-[#1c1c1e] border-l border-white/10 flex-col transition-all duration-300 flex">
             <div class="p-4 border-b border-white/10 bg-[#2c2c2e] flex justify-between items-center">
                 <h3 class="font-bold text-white flex items-center gap-2">
-                    <span class="text-xl">✨</span> AI Assistant
+                    <span class="text-xl">✨</span> AI
                 </h3>
                 <button id="closeAiChat" class="text-gray-400 hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -216,6 +216,11 @@
                 </div>
             </div>
             <div class="p-4 border-t border-white/10 bg-[#2c2c2e]">
+                <div class="mb-2">
+                    <select id="aiModelSelect" class="bg-transparent text-xs text-gray-400 hover:text-white focus:outline-none cursor-pointer appearance-none flex items-center gap-1">
+                        <option value="gpt-4o">Loading models...</option>
+                    </select>
+                </div>
                 <div class="relative">
                     <textarea id="aiChatInput" rows="1" class="w-full bg-black/20 border border-white/10 rounded-xl pl-4 pr-10 py-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none transition-colors resize-none text-sm" placeholder="Describe what you want..."></textarea>
                     <button id="aiChatSend" class="absolute right-2 top-2 p-1.5 text-purple-500 hover:text-purple-400 transition-colors rounded-lg hover:bg-white/5">
@@ -737,7 +742,7 @@
         const mainContainer = document.getElementById('mainContainer');
         const editorWrapper = document.getElementById('editorWrapper');
         const previewWrapper = document.getElementById('previewWrapper');
-        const previewInner = document.getElementById('preview-inner');
+        const previewInner = document.getElementById('preview');
         const previewFrame = document.getElementById('preview');
 
         document.getElementById('openNewTab').addEventListener('click', () => {
@@ -920,10 +925,11 @@
 
             try {
                 const currentCode = editor.getValue();
+                const model = document.getElementById('aiModelSelect').value;
                 const response = await fetch('/api/ai/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, currentCode })
+                    body: JSON.stringify({ prompt, currentCode, model })
                 });
 
                 const data = await response.json();
@@ -956,6 +962,64 @@
                 this.style.height = (this.scrollHeight) + 'px';
             });
         }
+
+        // Fetch and cache models
+        async function loadModels() {
+            const modelSelect = document.getElementById('aiModelSelect');
+            if (!modelSelect) return;
+
+            // Check cache
+            const cachedModels = localStorage.getItem('ai_models');
+            const cachedTime = localStorage.getItem('ai_models_time');
+            const now = Date.now();
+
+            if (cachedModels && cachedTime && (now - parseInt(cachedTime) < 24 * 60 * 60 * 1000)) {
+                renderModels(JSON.parse(cachedModels));
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/ai/models');
+                if (res.ok) {
+                    const models = await res.json();
+                    localStorage.setItem('ai_models', JSON.stringify(models));
+                    localStorage.setItem('ai_models_time', now.toString());
+                    renderModels(models);
+                } else {
+                    console.error('Failed to fetch models');
+                    // Fallback
+                    renderModels([
+                        { id: 'gpt-4o' },
+                        { id: 'gpt-4o-mini' },
+                        { id: 'google/gemini-3-pro-preview' }
+                    ]);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderModels(models) {
+            const modelSelect = document.getElementById('aiModelSelect');
+            if (!modelSelect) return;
+            
+            modelSelect.innerHTML = models.map(m => 
+                `<option value="${m.id}">${m.id}</option>`
+            ).join('');
+            
+            // Restore selection
+            const savedModel = localStorage.getItem('ai_selected_model');
+            if (savedModel) {
+                modelSelect.value = savedModel;
+            }
+
+            modelSelect.addEventListener('change', () => {
+                localStorage.setItem('ai_selected_model', modelSelect.value);
+            });
+        }
+
+        // Load models on init
+        loadModels();
     </script>
 </body>
 </html>
