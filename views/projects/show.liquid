@@ -214,7 +214,7 @@
             const themeColor = document.getElementById('editProjectThemeColor').value;
             
             try {
-                const response = await fetch('/interfaces/{{ project._id }}', {
+                const response = await fetch('/api/projects/{{ project._id }}', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -237,7 +237,7 @@
             if (!confirm('Are you sure you want to delete this project? All pages inside it will be deleted.')) return;
             
             try {
-                const response = await fetch('/interfaces/' + id, {
+                const response = await fetch('/api/projects/' + id, {
                     method: 'DELETE'
                 });
                 
@@ -258,7 +258,7 @@
             event.preventDefault(); 
             
             try {
-                const response = await fetch('/pages/' + id, {
+                const response = await fetch('/api/pages/' + id, {
                     method: 'DELETE'
                 });
                 

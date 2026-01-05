@@ -487,7 +487,7 @@
                 const displayNavigation = document.getElementById('settingsProjectDisplayNavigation').checked;
 
                 try {
-                    const response = await fetch(`/interfaces/${window.PROJECT_ID}`, {
+                    const response = await fetch(`/api/projects/${window.PROJECT_ID}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -512,7 +512,7 @@
                 if (!confirm('Are you sure you want to delete this project? All pages inside it will be deleted.')) return;
                 
                 try {
-                    const response = await fetch(`/interfaces/${window.PROJECT_ID}`, {
+                    const response = await fetch(`/api/projects/${window.PROJECT_ID}`, {
                         method: 'DELETE'
                     });
                     

@@ -55,14 +55,14 @@
     <div id="newProjectModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity duration-300">
         <div class="bg-[#1c1c1e] p-8 rounded-2xl shadow-2xl w-[500px] border border-white/10 ring-1 ring-white/5">
             <h2 class="text-xl font-bold text-white mb-6">Create New Project</h2>
-            <form action="/interfaces" method="POST">
+            <form id="createProjectForm" onsubmit="createProject(event)">
                 <div class="mb-4">
                     <label class="block text-gray-400 text-sm font-medium mb-2">Project Name</label>
-                    <input type="text" name="name" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="My Awesome Project">
+                    <input type="text" name="name" id="projectName" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="My Awesome Project">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-400 text-sm font-medium mb-2">Description</label>
-                    <textarea name="description" rows="3" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="What is this project about?"></textarea>
+                    <textarea name="description" id="projectDescription" rows="3" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="What is this project about?"></textarea>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="document.getElementById('newProjectModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
@@ -71,6 +71,32 @@
             </form>
         </div>
     </div>
+
+    <script>
+        async function createProject(e) {
+            e.preventDefault();
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDescription').value;
+            
+            try {
+                const res = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description })
+                });
+                if (res.ok) {
+                    const project = await res.json();
+                    // Redirect to the new project (which will redirect to home page)
+                    window.location.href = `/interfaces/${project._id}`;
+                } else {
+                    alert('Failed to create project');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error creating project');
+            }
+        }
+    </script>
 
 </body>
 </html>

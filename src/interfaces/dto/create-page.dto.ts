@@ -4,6 +4,6 @@ export class CreatePageDto {
   projectId?: string;
   name?: string;
   metaTitle?: string;
-  path?: string;
+  slug?: string;
   addToNavigation?: boolean;
 }

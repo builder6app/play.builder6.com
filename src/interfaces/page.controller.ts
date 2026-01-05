@@ -7,14 +7,14 @@ import { Page } from './schemas/page.schema';
 import { PageVersion } from './schemas/page-version.schema';
 import { AuthService } from '../auth/auth.service';
 
-@Controller()
+@Controller('api/pages')
 export class PageController {
   constructor(
     private readonly PageService: PageService,
     private readonly authService: AuthService
   ) {}
 
-  @Post('api/pages')
+  @Post('')
   async create(@Body() createPageDto: CreatePageDto, @Req() req: Request): Promise<Page> {
     const session = await this.authService.auth.api.getSession({
         headers: new Headers(req.headers as any),
@@ -22,7 +22,7 @@ export class PageController {
     return this.PageService.save(createPageDto, session?.user?.id);
   }
 
-  @Get('api/pages')
+  @Get('')
   async findAll(@Req() req: Request): Promise<Page[]> {
     const session = await this.authService.auth.api.getSession({
         headers: new Headers(req.headers as any),
@@ -30,12 +30,12 @@ export class PageController {
     return this.PageService.findAll(session?.user?.id);
   }
 
-  @Get('api/pages/:id')
+  @Get(':id')
   async findOne(@Param('id') id: string): Promise<Page> {
     return this.PageService.findOne(id);
   }
 
-  @Get('api/pages/:id/versions')
+  @Get(':id/versions')
   async getVersions(@Param('id') id: string): Promise<PageVersion[]> {
     return this.PageService.getVersions(id);
   }
