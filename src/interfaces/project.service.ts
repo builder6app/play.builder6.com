@@ -22,7 +22,7 @@ export class ProjectService {
       _id: id,
       name,
       description,
-      slug: id.toLowerCase(),
+      slug: id,
       owner: userId,
       created: now,
       created_by: userId,

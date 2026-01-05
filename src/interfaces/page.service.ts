@@ -76,7 +76,7 @@ export class PageService {
       projectId: projectId,
       name: name || 'Untitled Page',
       metaTitle,
-      slug: newId.toLocaleLowerCase(),
+      slug: newId.toLowerCase(),
       addToNavigation
     };
     await this.db.collection<Page>('builder6_pages').insertOne(newPage);

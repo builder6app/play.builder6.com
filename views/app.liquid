@@ -18,7 +18,7 @@
 </head>
 <body class="bg-black min-h-screen text-white overflow-x-hidden">
 
-    {% assign projectSlug = project.slug | default: project._id %}
+    {% assign projectSlug = project._id %}
     {% assign themeColor = project.themeColor | default: '#2563eb' %}
 
     {% if project.displayNavigation and navPages.size > 0 %}
@@ -45,10 +45,7 @@
 
             <nav class="flex-1 overflow-y-auto px-4 pb-4 space-y-1 scrollbar-hide">
                 {% for p in navPages %}
-                    {% assign href = p.path | prepend: '/' | prepend: projectSlug | prepend: '/app/' %}
-                    {% unless p.path %}
-                        {% assign href = p._id | prepend: '/' | prepend: projectSlug | prepend: '/app/' %}
-                    {% endunless %}
+                    {% assign href = p._id | prepend: '/' | prepend: projectSlug | prepend: '/app/' %}
                     
                     {% if p._id == page._id %}
                         <a href="{{ href }}" class="block px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-900/10" style="background-color: {{ themeColor }}; color: white;">{{ p.name }}</a>

@@ -73,7 +73,21 @@ export class SiteController {
   ) {
     const project = await this.resolveProject(slug);
 
-    const page = await this.PageService.findByPath(project._id!, path);
+    // 1. Try to find by path
+    let page = await this.PageService.findByPath(project._id!, path);
+
+    // 2. If not found, try to find by ID
+    if (!page) {
+      try {
+        const pageById = await this.PageService.findOne(path);
+        if (pageById && pageById.projectId === project._id) {
+          page = pageById;
+        }
+      } catch (e) {
+        // Ignore if ID not found or invalid
+      }
+    }
+
     if (!page) {
       throw new NotFoundException('Page not found');
     }
