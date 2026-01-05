@@ -6,7 +6,7 @@ export class Page {
   
   // Page Options
   metaTitle?: string;
-  path?: string; // URL slug, e.g. 'sign-up'
+  slug?: string; // URL slug, e.g. 'sign-up'
   addToNavigation?: boolean;
 
   // Steedos Standard Fields

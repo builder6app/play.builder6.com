@@ -19,7 +19,7 @@ export class PageService {
   }
 
   async save(createPageDto: CreatePageDto, userId?: string): Promise<Page> {
-    const { code, id, projectId, name, metaTitle, path, addToNavigation } = createPageDto;
+    const { code, id, projectId, name, metaTitle, slug, addToNavigation } = createPageDto;
     const now = new Date();
 
     // 1. Try to update existing page if ID is provided
@@ -51,7 +51,7 @@ export class PageService {
         };
         if (name) updateFields.name = name;
         if (metaTitle !== undefined) updateFields.metaTitle = metaTitle;
-        if (path !== undefined) updateFields.path = path;
+        if (slug !== undefined) updateFields.slug = slug;
         if (addToNavigation !== undefined) updateFields.addToNavigation = addToNavigation;
 
         await this.db.collection<Page>('builder6_pages').updateOne(
@@ -64,8 +64,9 @@ export class PageService {
     }
 
     // 2. Create new page (Fork or New)
+    const newId = this.generateId();
     const newPage: Page = {
-      _id: this.generateId(),
+      _id: newId,
       code,
       owner: userId,
       created: now,
@@ -75,7 +76,7 @@ export class PageService {
       projectId: projectId,
       name: name || 'Untitled Page',
       metaTitle,
-      path,
+      slug: newId.toLocaleLowerCase(),
       addToNavigation
     };
     await this.db.collection<Page>('builder6_pages').insertOne(newPage);
