@@ -8,23 +8,7 @@
 </head>
 <body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
 
-    <header class="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/'">
-            <img src="/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
-            <h1 class="font-semibold text-lg tracking-tight text-white">Page Builder <span class="text-xs font-normal text-gray-400 ml-1 bg-white/10 px-2 py-0.5 rounded-full">Liquid</span></h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 ml-2 border-l border-white/10 pl-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold shadow-inner">
-                        <span>{{ user.name | slice: 0, 1 | upcase }}</span>
-                    </div>
-                    <span class="text-sm text-gray-300 hidden md:block">{{ user.name }}</span>
-                    <a href="/" class="text-gray-400 hover:text-white text-xs transition-colors">Back to Editor</a>
-                </div>
-            </div>
-        </div>
-    </header>
+    {% render 'partials/header.liquid', is_editor: false, user: user %}
 
     <main class="flex-1 container mx-auto px-6 py-8 max-w-5xl">
         <div class="flex justify-between items-center mb-8">
