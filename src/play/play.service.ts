@@ -18,7 +18,7 @@ export class PlayService {
   }
 
   async save(createSnippetDto: CreateSnippetDto, userId?: string): Promise<Snippet> {
-    const { code, id } = createSnippetDto;
+    const { code, id, projectId, name } = createSnippetDto;
     const now = new Date();
 
     // 1. Try to update existing snippet if ID is provided
@@ -43,18 +43,19 @@ export class PlayService {
         await this.db.collection<SnippetVersion>('play_snippet_versions').insertOne(newVersion);
 
         // Update current snippet
+        const updateFields: any = {
+          code: code,
+          modified: now,
+          modified_by: userId
+        };
+        if (name) updateFields.name = name;
+
         await this.db.collection<Snippet>('play_snippets').updateOne(
           { _id: id },
-          {
-            $set: {
-              code: code,
-              modified: now,
-              modified_by: userId
-            }
-          }
+          { $set: updateFields }
         );
         
-        return { ...existingSnippet, code, modified: now, modified_by: userId };
+        return { ...existingSnippet, ...updateFields };
       }
     }
 
@@ -66,10 +67,19 @@ export class PlayService {
       created: now,
       created_by: userId,
       modified: now,
-      modified_by: userId
+      modified_by: userId,
+      projectId: projectId,
+      name: name || 'Untitled Page'
     };
     await this.db.collection<Snippet>('play_snippets').insertOne(newSnippet);
     return newSnippet;
+  }
+
+  async findAllByProject(projectId: string): Promise<Snippet[]> {
+    return this.db.collection<Snippet>('play_snippets')
+      .find({ projectId })
+      .sort({ modified: -1 })
+      .toArray();
   }
 
   async getVersions(snippetId: string): Promise<SnippetVersion[]> {

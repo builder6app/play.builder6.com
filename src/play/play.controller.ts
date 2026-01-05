@@ -60,9 +60,13 @@ export class PlayController {
     res.send(html);
   }
 
-  @Get(':id')
-  async getSnippetPage(@Param('id') id: string, @Res() res: Response) {
-    return res.render('index');
+  @Get('pages/:pageId')
+  async getSnippetPage(@Param('pageId') id: string, @Res() res: Response) {
+    const snippet = await this.playService.findOne(id);
+    if (!snippet) {
+      return res.redirect('/');
+    }
+    return res.render('index', { snippet });
   }
 }
 

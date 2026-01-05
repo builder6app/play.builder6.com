@@ -1,8 +1,7 @@
-export class Snippet {
+export class Project {
   _id?: string;
-  projectId?: string;
-  name?: string; // Optional name for the page
-  code: string;
+  name: string;
+  description?: string;
   
   // Steedos Standard Fields
   owner?: string;
@@ -11,4 +10,3 @@ export class Snippet {
   modified: Date;
   modified_by?: string;
 }
-

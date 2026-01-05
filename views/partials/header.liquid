@@ -1,7 +1,13 @@
     <header class="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl z-50 {% unless is_editor %}sticky top-0{% endunless %}">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/'">
-            <img src="/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
-            <h1 class="font-semibold text-lg tracking-tight text-white">Interfaces <span class="text-xs font-normal text-gray-400 ml-1 bg-white/10 px-2 py-0.5 rounded-full">beta</span></h1>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/projects'">
+                <img src="/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
+                <h1 class="font-semibold text-lg tracking-tight text-white">Interfaces <span class="text-xs font-normal text-gray-400 ml-1 bg-white/10 px-2 py-0.5 rounded-full">beta</span></h1>
+            </div>
+            {% if is_editor %}
+            <div class="h-6 w-px bg-white/10 mx-2"></div>
+            <input type="text" id="snippetNameInput" class="bg-transparent border border-transparent hover:border-white/10 focus:border-blue-500 rounded px-2 py-1 text-sm text-white focus:outline-none transition-colors w-48" placeholder="Untitled Page">
+            {% endif %}
         </div>
         <div class="flex items-center gap-4">
             {% if is_editor %}
@@ -101,11 +107,11 @@
                 <!-- Dropdown Menu -->
                 <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-48 bg-[#1c1c1e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-white/5 backdrop-blur-xl transform origin-top-right transition-all">
                     <div class="p-1">
-                        <a href="/my-snippets" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                        <a href="/projects" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                            My Snippets
+                            Projects
                         </a>
-                        <a href="/" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                        <a href="/editor" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
                             Back to Editor
                         </a>

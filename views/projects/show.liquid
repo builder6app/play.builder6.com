@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} - Builder6 Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
+
+    {% render 'partials/header.liquid', is_editor: false, user: user %}
+
+    <main class="flex-1 container mx-auto px-6 py-8 max-w-5xl">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center text-sm text-gray-400 mb-6">
+            <a href="/projects" class="hover:text-white transition-colors">Projects</a>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            <span class="text-white font-medium">{{ project.name }}</span>
+        </nav>
+
+        <div class="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
+            <div>
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-2">{{ project.name }}</h2>
+                <p class="text-gray-400 max-w-2xl">{{ project.description }}</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('editProjectModal').classList.remove('hidden')" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-white/10 hover:border-white/30">
+                    Settings
+                </button>
+                <a href="/editor?projectId={{ project._id }}" class="bg-[#007AFF] hover:bg-[#0062cc] text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 flex items-center gap-2 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    New Page
+                </a>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-semibold text-white mb-4">Pages</h3>
+
+        {% if snippets.size == 0 %}
+        <div class="text-center py-16 bg-[#1c1c1e] rounded-3xl border border-white/5 border-dashed">
+            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                📄
+            </div>
+            <h3 class="text-lg font-medium text-white mb-1">No pages yet</h3>
+            <p class="text-gray-400 mb-4 text-sm">Create your first page in this project.</p>
+            <a href="/editor?projectId={{ project._id }}" class="text-blue-400 hover:text-blue-300 hover:underline text-sm">Create Page &rarr;</a>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for snippet in snippets %}
+            <div class="group relative bg-[#1c1c1e] border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1">
+                <a href="/pages/{{ snippet._id }}" class="block p-5 h-full">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-white font-semibold text-lg truncate pr-2 group-hover:text-blue-400 transition-colors">{{ snippet.name | default: "Untitled Page" }}</h3>
+                        <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full border border-white/5">{{ snippet.modified | date: "%Y-%m-%d" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
+                        <span class="text-xs text-gray-500">Page</span>
+                        <span class="text-blue-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            Edit <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </span>
+                    </div>
+                </a>
+                <!-- Delete Button (Absolute positioned) -->
+                <button onclick="deleteSnippet('{{ snippet._id }}')" class="absolute top-3 right-3 p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10" title="Delete Page">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Edit Project Modal -->
+    <div id="editProjectModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-[#1c1c1e] p-8 rounded-2xl shadow-2xl w-[500px] border border-white/10 ring-1 ring-white/5">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white">Project Settings</h2>
+                <button onclick="deleteProject('{{ project._id }}')" class="text-red-400 hover:text-red-300 text-sm font-medium hover:underline">Delete Project</button>
+            </div>
+            <form action="/projects/{{ project._id }}" method="POST">
+                <!-- Method Override for PUT -->
+                <input type="hidden" name="_method" value="PUT"> 
+                <!-- Note: HTML forms don't support PUT natively, usually handled by middleware or JS. 
+                     For simplicity here, we might need JS or a backend that accepts POST for updates if method-override isn't set up.
+                     Let's assume we'll use JS fetch for updates to be safe or standard POST if backend handles it.
+                     Actually, let's use a simple JS handler for this form to send JSON.
+                -->
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Project Name</label>
+                    <input type="text" id="editProjectName" name="name" value="{{ project.name }}" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-400 text-sm font-medium mb-2">Description</label>
+                    <textarea id="editProjectDesc" name="description" rows="3" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">{{ project.description }}</textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('editProjectModal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button type="button" onclick="updateProject()" class="bg-[#007AFF] hover:bg-[#0062cc] text-white px-6 py-2 rounded-lg font-medium transition-colors">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function updateProject() {
+            const name = document.getElementById('editProjectName').value;
+            const description = document.getElementById('editProjectDesc').value;
+            
+            try {
+                const response = await fetch('/projects/{{ project._id }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to update project');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Are you sure you want to delete this project? All pages inside it will be deleted.')) return;
+            
+            try {
+                const response = await fetch('/projects/' + id, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/projects';
+                } else {
+                    alert('Failed to delete project');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+
+        async function deleteSnippet(id) {
+            if (!confirm('Are you sure you want to delete this page?')) return;
+            // Prevent navigation to the page
+            event.preventDefault(); 
+            
+            try {
+                const response = await fetch('/' + id, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete page');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -67,7 +67,7 @@
                 const res = await fetch('/api/auth/sign-in/social', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ provider: 'google', callbackURL: '/' })
+                    body: JSON.stringify({ provider: 'google', callbackURL: '/projects' })
                 });
                 const data = await res.json();
                 if (data.url) {
@@ -95,7 +95,7 @@
                 });
 
                 if (res.ok) {
-                    window.location.href = '/';
+                    window.location.href = '/projects';
                 } else {
                     const err = await res.json();
                     alert(err.message || 'Authentication failed');

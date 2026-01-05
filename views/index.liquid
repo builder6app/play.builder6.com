@@ -48,6 +48,11 @@
 </head>
 <body class="flex flex-col h-screen bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white overflow-hidden">
 
+    <script>
+        window.PROJECT_ID = "{{ projectId }}";
+        window.SNIPPET = {{ snippet | json }};
+    </script>
+
     {% render 'partials/header.liquid', is_editor: true %}
 
     <!-- History Modal -->
@@ -195,15 +200,28 @@
         }
 
         async function getCodeFromUrl() {
-            // 优先检查路径 ID (例如 /64f...)
+            // Check injected snippet first
+            if (window.SNIPPET) {
+                currentSnippetId = window.SNIPPET._id;
+                if (document.getElementById('snippetNameInput')) {
+                    document.getElementById('snippetNameInput').value = window.SNIPPET.name || '';
+                }
+                return window.SNIPPET.code;
+            }
+
+            // 优先检查路径 ID (例如 /pages/64f...)
             const path = window.location.pathname;
-            if (path && path.length > 1) {
-                const id = path.substring(1); // 去掉开头的 /
+            const match = path.match(/^\/pages\/([a-zA-Z0-9_-]+)$/);
+            if (match) {
+                const id = match[1];
                 try {
                     const response = await fetch(`/api/play/snippets/${id}`);
                     if (response.ok) {
                         const data = await response.json();
                         currentSnippetId = data._id;
+                        if (document.getElementById('snippetNameInput')) {
+                            document.getElementById('snippetNameInput').value = data.name || '';
+                        }
                         return data.code;
                     }
                 } catch (e) {
@@ -220,6 +238,9 @@
                     if (response.ok) {
                         const data = await response.json();
                         currentSnippetId = data._id;
+                        if (document.getElementById('snippetNameInput')) {
+                            document.getElementById('snippetNameInput').value = data.name || '';
+                        }
                         return data.code;
                     }
                 } catch (e) {
@@ -233,6 +254,8 @@
         document.getElementById('saveBtn').addEventListener('click', async () => {
             const btn = document.getElementById('saveBtn');
             const code = editor.getValue();
+            const nameInput = document.getElementById('snippetNameInput');
+            const name = nameInput ? nameInput.value : null;
             
             try {
                 btn.innerHTML = `<span>Saving...</span>`;
@@ -242,6 +265,12 @@
                 const payload = { code };
                 if (currentSnippetId) {
                     payload.id = currentSnippetId;
+                }
+                if (name) {
+                    payload.name = name;
+                }
+                if (window.PROJECT_ID) {
+                    payload.projectId = window.PROJECT_ID;
                 }
 
                 const response = await fetch('/api/play/snippets', {
@@ -261,8 +290,8 @@
                     lastSavedCode = code;
 
                     // 2. 更新 URL
-                    const newUrl = window.location.origin + '/' + data._id;
-                    window.history.pushState(null, '', '/' + data._id);
+                    const newUrl = window.location.origin + '/pages/' + data._id;
+                    window.history.pushState(null, '', '/pages/' + data._id);
                     
                     updateSaveButtonState();
                 } else {
