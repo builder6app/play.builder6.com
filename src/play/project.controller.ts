@@ -150,6 +150,6 @@ export class ProjectController {
     const project = await this.projectService.findOne(projectId);
     const pages = await this.playService.findAllByProject(projectId);
 
-    return res.render('index', { page, projectId, project, pages, user: session?.user });
+    return res.render('editor', { page, projectId, project, pages, user: session?.user });
   }
 }

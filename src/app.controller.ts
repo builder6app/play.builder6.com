@@ -12,7 +12,7 @@ export class AppController {
   }
 
   @Get('editor')
-  @Render('index')
+  @Render('editor')
   editor(@Query('projectId') projectId: string) {
     return { projectId };
   }

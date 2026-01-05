@@ -40,26 +40,7 @@ export class PlayController {
     return this.playService.getVersions(id);
   }
 
-  @Get('view/:id')
-  async viewPage(@Param('id') id: string, @Res() res: Response) {
-    const page = await this.playService.findOne(id);
-    // For direct view, we don't have project context easily available or we don't want to show nav
-    return res.render('app', { page });
-  }
 
-
-
-  @Delete('pages/:id')
-  async delete(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
-    const session = await this.authService.auth.api.getSession({
-      headers: new Headers(req.headers as any),
-    });
-    if (!session) {
-      return res.status(401).send('Unauthorized');
-    }
-    await this.playService.delete(id, session.user.id);
-    return res.status(200).send('Deleted');
-  }
 }
 
 
