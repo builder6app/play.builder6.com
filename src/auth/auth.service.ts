@@ -19,6 +19,7 @@ export class AuthService implements OnModuleInit {
     const { mongodbAdapter } = await _importDynamic('better-auth/adapters/mongodb');
 
     this.auth = betterAuth({
+      baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
       database: mongodbAdapter(this.db),
       user: {
         modelName: 'better_users',
@@ -51,11 +52,12 @@ export class AuthService implements OnModuleInit {
       },
       emailVerification: {
         sendOnSignUp: true,
-        sendVerificationEmail: async (user, url, token) => {
-            console.log('----------------------------------------');
-            console.log(`📧 Send verification email to ${user.email}`);
-            console.log(`🔗 URL: ${url}`);
-            console.log('----------------------------------------');
+        sendVerificationEmail: async ({ user, url, token }, request) => {
+            console.log('========================================');
+            console.log('📧 EMAIL VERIFICATION');
+            console.log(`To:   ${user.email}`);
+            console.log(`Link: ${url}`);
+            console.log('========================================');
         }
       },
       socialProviders: {
