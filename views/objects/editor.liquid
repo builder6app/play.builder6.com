@@ -37,14 +37,16 @@
 </head>
 <body class="flex flex-col h-screen bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white">
 
-    {% render 'partials/header.liquid', is_page_editor: false, is_object_editor: true, project: project, user: user %}
     {% render 'partials/notifications.liquid' %}
 
     <!-- Editor Toolbar -->
     <div class="flex items-center justify-between px-6 py-2 border-b border-white/10 bg-[#1c1c1e] z-40">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+             <a href="/app/{{ project.slug | default: project._id }}" class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all border border-white/10 group" title="Back to Project">
+                <i class="ri-arrow-left-line text-lg group-hover:-translate-x-0.5 transition-transform"></i>
+             </a>
              <div class="flex items-center gap-2">
-                <a href="/app/{{ project.slug | default: project._id }}" class="text-sm text-gray-400 hover:text-white transition-colors">{{ project.name }}</a>
+                <span class="text-sm text-gray-400">{{ project.name }}</span>
                 <span class="text-gray-600">/</span>
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -367,8 +369,32 @@
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
         
         require(['vs/editor/editor.main'], function() {
+            let defaultValue = initialSchema;
+            
+            if (isNew && (!defaultValue || defaultValue === "''")) {
+                const randomName = 'obj_' + Math.random().toString(36).substr(2, 6);
+                const defaultYaml = {
+                    name: randomName,
+                    label: "New Object",
+                    icon: "box",
+                    version: "1.0.0",
+                    description: "A new object definition",
+                    fields: {
+                        name: {
+                            type: "text",
+                            label: "Name",
+                            required: true,
+                            searchable: true
+                        }
+                    }
+                };
+                defaultValue = jsyaml.dump(defaultYaml);
+            } else if (!defaultValue) {
+                defaultValue = '# Describe your object in AI chat, or type YAML here...';
+            }
+
             editor = monaco.editor.create(document.getElementById('editor-container'), {
-                value: initialSchema || '# Describe your object in AI chat, or type YAML here...',
+                value: defaultValue,
                 language: 'yaml',
                 theme: 'vs-dark',
                 automaticLayout: true,
