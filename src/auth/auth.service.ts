@@ -31,6 +31,16 @@ export class AuthService implements OnModuleInit {
                 member: {
                     modelName: 'space_users',
                 }
+            },
+            async sendInvitationEmail(data) {
+                const baseURL = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+                const inviteLink = `${baseURL}/accounts/accept-invitation/${data.id}`;
+                console.log('========================================');
+                console.log('📧 ORGANIZATION INVITATION');
+                console.log(`To:   ${data.email}`);
+                console.log(`Org:  ${data.organization.name}`);
+                console.log(`Link: ${inviteLink}`);
+                console.log('========================================');
             }
         })
       ],

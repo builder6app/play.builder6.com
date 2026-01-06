@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% render 'partials/head.liquid' %}
+    <title>Join Organization - Builder6</title>
+</head>
+<body class="bg-black text-white flex items-center justify-center min-h-screen font-sans antialiased selection:bg-blue-500 selection:text-white overflow-hidden" x-data="acceptInvitePage">
+    {% render 'partials/notifications.liquid' %}
+    
+    <!-- Ambient Background Effects -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/20 blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-10 bg-[#1c1c1e]/80 backdrop-blur-2xl p-10 rounded-[2rem] shadow-2xl w-[420px] border border-white/10 ring-1 ring-white/5 text-center">
+        <div class="flex justify-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+        </div>
+        
+        <h2 class="text-3xl font-bold mb-2 text-white">Join Organization</h2>
+        <p class="text-gray-400 mb-8 text-sm" x-show="invitation">
+            You have been invited to join <strong class="text-white" x-text="invitation?.organizationName"></strong>
+        </p>
+
+        <div x-show="loading" class="py-8">
+            <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-xs text-gray-500 mt-2">Verifying invitation...</p>
+        </div>
+
+        <div x-show="!loading && invitation">
+             <div class="bg-white/5 rounded-xl p-4 mb-8 text-left border border-white/10">
+                <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Invited As</div>
+                <div class="text-white font-medium truncate" x-text="invitation?.email"></div>
+                 <div class="text-xs text-gray-400 uppercase tracking-wider mt-3 mb-1">Role</div>
+                <div class="text-white font-medium capitalize" x-text="invitation?.role"></div>
+            </div>
+
+            <button @click="acceptInvitation" class="w-full bg-[#007AFF] hover:bg-[#0062cc] text-white py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg shadow-blue-900/30 hover:shadow-blue-900/50 transform hover:-translate-y-0.5">
+                Accept Invitation
+            </button>
+        </div>
+
+        <div x-show="!loading && error">
+            <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
+                 <p class="text-red-400 text-sm" x-text="error"></p>
+            </div>
+             <a href="/" class="text-sm text-gray-400 hover:text-white transition-colors">Return to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('acceptInvitePage', () => ({
+                loading: true,
+                error: null,
+                invitation: null,
+                token: '',
+
+                async init() {
+                    // Extract token from URL path or query params
+                    // URL format usually: /accept-invitation/{id}
+                    // Since we are rendering this view, we assume the user landed here somehow.
+                    // If the link is /accept-invitation/:id, we need to make sure our routing handles it.
+                    // Better Auth default link format is usually /accept-invitation/{id}.
+                    
+                    // We need to see how better-auth generates the link. By default it appends /accept-invitation/{id} to baseURL.
+                    // But we used a custom route? No, we didn't override the path, just the email sender.
+                    
+                    // IF the user lands on /accept-invitation/:id (frontend route), we need that route to render this page.
+                    // Or we extract from query param if we redirected.
+                    
+                    const pathParts = window.location.pathname.split('/');
+                    const tokenFromPath = pathParts[pathParts.length - 1]; // primitive extraction
+                    this.token = tokenFromPath;
+
+                    // Fetch invitation details to display
+                    try {
+                        const res = await fetch(`/api/auth/organization/get-invitation?id=${this.token}`);
+                        if (res.ok) {
+                            this.invitation = await res.json();
+                        } else {
+                            this.error = 'Invalid or expired invitation.';
+                        }
+                    } catch (e) {
+                        this.error = 'Failed to load invitation.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async acceptInvitation() {
+                    try {
+                        const res = await fetch('/api/auth/organization/accept-invitation', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ invitationId: this.token })
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            // Redirect to the organization or dashboard
+                            // data might contain organization info
+                             $notify('Joined successfully!', 'success');
+                             setTimeout(() => window.location.href = '/app', 1000);
+                        } else {
+                            const err = await res.json();
+                            $notify(err.message || 'Failed to accept invitation', 'error');
+                        }
+                    } catch (e) {
+                         $notify('An error occurred', 'error');
+                    }
+                }
+            }))
+        })
+    </script>
+</body>
+</html>
