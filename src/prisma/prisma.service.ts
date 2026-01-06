@@ -5,6 +5,30 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
 
+  constructor() {
+    let url = process.env.PLAY_MONGODB_URI;
+    if (url) {
+      // Regex to match connection string without a database path
+      // Pattern explanation:
+      // ^((?:mongodb(?:\+srv)?):\/\/[^/]+)  -> Group 1: Protocol + Auth + Host (stops at first slash)
+      // (?:\/)?                             -> Match optional trailing slash (non-capturing)
+      // (\?.*)?$                            -> Group 2: Optional query params (starts with ?)
+      const noDbPattern = /^((?:mongodb(?:\+srv)?):\/\/[^/]+)(?:\/)?(\?.*)?$/;
+      const match = url.match(noDbPattern);
+
+      if (match) {
+        const base = match[1];
+        const query = match[2] || '';
+        const dbName = process.env.PLAY_MONGODB_DB || 'builder6';
+        url = `${base}/${dbName}${query}`;
+        console.warn(
+          `[PrismaService] Auto-appending database name '${dbName}' to connection string.`,
+        );
+      }
+    }
+    super({ datasources: url ? { db: { url } } : undefined });
+  }
+
   async onModuleInit() {
     await this.$connect();
     await this.ensureCollections();
