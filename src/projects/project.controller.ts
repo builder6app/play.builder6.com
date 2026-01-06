@@ -38,7 +38,7 @@ export class ProjectController {
   }
 
   @Get(':id')
-  async show(@Req() req: Request, @Param('id') id: string, @Res() res: Response) {
+  async show(@Req() req: Request, @Param('id') idOrSlug: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
@@ -46,30 +46,39 @@ export class ProjectController {
       return res.redirect('/login');
     }
     
+    const project = await this.projectService.resolve(idOrSlug);
+    if (!project) {
+       // Should render a 404 page or redirect
+       return res.redirect('/app');
+    }
+
     // Find pages belonging to this project
-    const pages = await this.PageService.findAllByProject(id);
+    const pages = await this.PageService.findAllByProject(project._id!);
     // Find objects belonging to this project
-    const objects = await this.objectsService.findAll(session.user.id, id);
+    const objects = await this.objectsService.findAll(session.user.id, project._id!);
     
-    // Fallback if no pages exist (shouldn't happen with new create logic, but for old projects)
-    const project = await this.projectService.findOne(id);
     return res.render('projects/show', { project, pages, objects, user: session.user });
   }
 
   @Get(':projectId/:pageId')
-  async editPage(@Req() req: Request, @Param('projectId') projectId: string, @Param('pageId') pageId: string, @Res() res: Response) {
+  async editPage(@Req() req: Request, @Param('projectId') projectIdOrSlug: string, @Param('pageId') pageId: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
 
-    const page = await this.PageService.findOne(pageId);
-    if (!page) {
-      return res.redirect(`/app/${projectId}`);
+    const project = await this.projectService.resolve(projectIdOrSlug);
+    if (!project) {
+       return res.redirect('/app');
     }
 
-    const project = await this.projectService.findOne(projectId);
-    const pages = await this.PageService.findAllByProject(projectId);
+    // TODO: Resolve page by slug as well if needed, for now stick to ID for page
+    const page = await this.PageService.findOne(pageId);
+    if (!page) {
+      return res.redirect(`/app/${project.slug || project._id}`);
+    }
 
-    return res.render('pages/editor', { page, projectId, project, pages, user: session?.user });
+    const pages = await this.PageService.findAllByProject(project._id!);
+
+    return res.render('pages/editor', { page, projectId: project._id, project, pages, user: session?.user });
   }
 }

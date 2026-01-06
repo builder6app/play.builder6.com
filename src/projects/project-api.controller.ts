@@ -78,8 +78,13 @@ export class ProjectApiController {
     if (!session) {
       return res.status(401).send('Unauthorized');
     }
-    await this.projectService.update(id, session.user.id, body);
-    return res.status(200).send('Updated');
+    
+    try {
+      await this.projectService.update(id, session.user.id, body);
+      return res.status(200).send('Updated');
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
   }
 
   @Delete(':id')

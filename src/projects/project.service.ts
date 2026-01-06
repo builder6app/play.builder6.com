@@ -60,8 +60,25 @@ export class ProjectService {
     return this.db.collection<Project>('builder6_projects').findOne({ slug });
   }
 
+  async resolve(idOrSlug: string): Promise<Project | null> {
+    return this.db.collection<Project>('builder6_projects').findOne({
+      $or: [
+        { _id: idOrSlug },
+        { slug: idOrSlug }
+      ]
+    });
+  }
+
   async update(id: string, userId: string, updateData: Partial<Project>): Promise<Project> {
     const now = new Date();
+
+    if (updateData.slug) {
+      const existing = await this.db.collection<Project>('builder6_projects').findOne({ slug: updateData.slug });
+      if (existing && existing._id !== id) {
+        throw new Error('Project with this slug already exists.');
+      }
+    }
+
     await this.db.collection<Project>('builder6_projects').updateOne(
       { _id: id, owner: userId },
       { 

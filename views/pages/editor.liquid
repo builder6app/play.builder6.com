@@ -24,7 +24,7 @@
     <div class="flex items-center justify-between px-6 py-2 border-b border-white/10 bg-[#1c1c1e] z-40">
         <div class="flex items-center gap-2">
              <div class="flex items-center gap-2">
-                <a href="/app/{{ project._id }}" class="text-sm text-gray-400 hover:text-white transition-colors">{{ project.name }}</a>
+                <a href="/app/{{ project.slug | default: project._id }}" class="text-sm text-gray-400 hover:text-white transition-colors">{{ project.name }}</a>
                 <span class="text-gray-600">/</span>
                 <input type="text" id="pageNameInput" class="bg-transparent border border-transparent hover:border-white/10 focus:border-blue-500 rounded px-2 py-1 text-sm text-white focus:outline-none transition-colors w-48" placeholder="Untitled Page">
             </div>

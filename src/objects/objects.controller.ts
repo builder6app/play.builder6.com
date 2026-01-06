@@ -13,26 +13,26 @@ export class ObjectsController {
 
   @Get()
   @Render('objects/index')
-  async index(@Param('projectId') projectId: string) {
-    const objects = await this.objectsService.findAll('mock-user-id', projectId);
-    const project = await this.projectService.findOne(projectId);
-
+  async index(@Param('projectId') projectIdOrSlug: string) {
+    const project = await this.projectService.resolve(projectIdOrSlug);
     if (!project) {
         throw new NotFoundException('Project not found');
     }
+
+    const objects = await this.objectsService.findAll('mock-user-id', project._id!);
 
     return {
       user: { name: 'Developer' },
       project: project,
       objects,
-      projectId 
+      projectId: project._id 
     };
   }
 
   @Get('new')
   @Render('objects/editor')
-  async newObject(@Param('projectId') projectId: string) {
-    const project = await this.projectService.findOne(projectId);
+  async newObject(@Param('projectId') projectIdOrSlug: string) {
+    const project = await this.projectService.resolve(projectIdOrSlug);
     
     if (!project) {
         throw new NotFoundException('Project not found');
@@ -42,30 +42,31 @@ export class ObjectsController {
       user: { name: 'Developer' },
       project: project,
       isNew: true,
-      projectId
+      projectId: project._id
     };
   }
 
   @Get(':id')
   @Render('objects/editor')
-  async editObject(@Param('id') id: string, @Param('projectId') projectId: string) {
+  async editObject(@Param('id') id: string, @Param('projectId') projectIdOrSlug: string) {
     // Note: :id can be 'new' if route matched improperly, but 'new' is handled above.
     
-    if (id === 'new') return this.newObject(projectId); // Fallback if needed, though Order matters
+    if (id === 'new') return this.newObject(projectIdOrSlug); // Fallback if needed, though Order matters
     
-    const obj = await this.objectsService.findOne(id);
-    const project = await this.projectService.findOne(projectId);
+    const project = await this.projectService.resolve(projectIdOrSlug);
 
     if (!project) {
         throw new NotFoundException('Project not found');
     }
+
+    const obj = await this.objectsService.findOne(id);
 
     return {
       user: { name: 'Developer' },
       project: project,
       object: obj,
       isNew: false,
-      projectId: projectId
+      projectId: project._id
     };
   }
 
