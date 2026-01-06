@@ -9,6 +9,30 @@
             font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
             line-height: 1.5;
         }
+        
+        .bg-grid-pattern {
+            background-color: #f5f5f7;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen bg-black text-white font-sans antialiased selection:bg-blue-500 selection:text-white">
@@ -68,71 +92,87 @@
                  </div>
 
                  <!-- Designer View -->
-                 <div id="designView" class="absolute inset-0 z-0 flex flex-row bg-gray-100">
+                 <div id="designView" class="absolute inset-0 z-0 flex flex-row bg-[#F5F5F7]">
                      <!-- Components Toolbox -->
-                    <div class="w-48 bg-white border-r border-gray-200 flex flex-col z-10 flex-shrink-0">
-                        <div class="p-4 border-b border-gray-100 font-semibold text-xs uppercase tracking-wider text-gray-500">
-                            Fields
+                    <div class="w-64 bg-[#F5F5F7] border-r border-gray-300 flex flex-col z-10 flex-shrink-0 backdrop-blur-xl bg-opacity-80">
+                        <div class="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                            Components
                         </div>
-                        <div id="fieldsPalette" class="flex-1 overflow-y-auto p-2 space-y-2">
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="text">
-                                <span class="material-icons text-gray-400 text-sm">text_fields</span> Text
+                        <div id="fieldsPalette" class="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="text">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-text text-lg"></i></div> 
+                                <span class="font-medium">Text</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="textarea">
-                                <span class="material-icons text-gray-400 text-sm">notes</span> Text Area
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="textarea">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-file-text-line text-lg"></i></div> 
+                                <span class="font-medium">Text Area</span>
                             </div>
-                        <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="select">
-                                <span class="material-icons text-gray-400 text-sm">list</span> Select
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="select">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-list-check text-lg"></i></div> 
+                                <span class="font-medium">Select</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="boolean">
-                                <span class="material-icons text-gray-400 text-sm">check_box</span> Checkbox
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="boolean">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-checkbox-line text-lg"></i></div> 
+                                <span class="font-medium">Checkbox</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="date">
-                                <span class="material-icons text-gray-400 text-sm">event</span> Date
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="date">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-calendar-line text-lg"></i></div> 
+                                <span class="font-medium">Date</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="number">
-                                <span class="material-icons text-gray-400 text-sm">123</span> Number
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="number">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-hashtag text-lg"></i></div> 
+                                <span class="font-medium">Number</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="currency">
-                                <span class="material-icons text-gray-400 text-sm">attach_money</span> Currency
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="currency">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center"><i class="ri-money-dollar-circle-line text-lg"></i></div> 
+                                <span class="font-medium">Currency</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="lookup">
-                                <span class="material-icons text-gray-400 text-sm">search</span> Lookup
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="lookup">
+                                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center"><i class="ri-search-line text-lg"></i></div> 
+                                <span class="font-medium">Lookup</span>
                             </div>
-                            <div class="palette-item bg-gray-50 border border-gray-200 hover:border-blue-500 hover:shadow-sm rounded p-2 text-sm text-gray-700 cursor-grab flex items-center gap-2 select-none" data-type="master_detail">
-                                <span class="material-icons text-gray-400 text-sm">link</span> Master-Detail
+                            <div class="palette-item bg-white shadow-sm border border-gray-200/50 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm text-gray-700 cursor-grab flex items-center gap-3 select-none" data-type="master_detail">
+                                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center"><i class="ri-links-line text-lg"></i></div> 
+                                <span class="font-medium">Master-Detail</span>
                             </div>
                             <!-- Special Items -->
-                            <div class="palette-item bg-gray-100 border border-gray-300 hover:border-gray-500 hover:shadow-sm rounded p-2 text-sm font-semibold text-gray-800 cursor-grab flex items-center gap-2 select-none mt-4" data-type="section">
-                                <span class="material-icons text-gray-500 text-sm">view_headline</span> Section
+                            <div class="palette-item bg-gray-50/80 shadow-sm border border-gray-200/50 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 rounded-xl p-3 text-sm font-semibold text-gray-700 cursor-grab flex items-center gap-3 select-none mt-4" data-type="section">
+                                <div class="w-8 h-8 rounded-lg bg-gray-200 text-gray-600 flex items-center justify-center"><i class="ri-layout-row-line text-lg"></i></div> 
+                                <span class="font-medium">Section</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Canvas Area -->
-                    <div class="flex-1 overflow-y-auto p-8 relative flex flex-col items-center justify-start bg-gray-50/50">
-                        <div id="designerCanvas" class="w-full max-w-2xl bg-white min-h-[500px] rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                    <div class="flex-1 overflow-y-auto px-12 py-12 relative flex flex-col items-center justify-start bg-grid-pattern">
+                        <div id="designerCanvas" class="w-full max-w-3xl bg-white min-h-[600px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] ring-1 ring-black/5 flex flex-col transition-all duration-300">
                             <!-- Header -->
-                            <div id="canvasHeader" class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex items-center gap-3 rounded-t-xl">
+                            <div id="canvasHeader" class="border-b border-gray-100 px-8 py-6 flex items-center gap-4">
                                 <!-- Header content generated dynamically -->
-                            <div class="w-10 h-10 rounded-lg bg-gray-200 animate-pulse"></div>
-                            <div class="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 animate-pulse"></div>
+                            <div class="space-y-2">
+                                <div class="h-6 w-32 bg-gray-100 rounded animate-pulse"></div>
+                                <div class="h-4 w-20 bg-gray-50 rounded animate-pulse"></div>
+                            </div>
                             </div>
                             
                             <!-- Drop Zone -->
-                            <div id="formFields" class="flex-1 p-6 min-h-[200px] grid grid-cols-2 gap-4 content-start">
+                            <div id="formFields" class="flex-1 p-8 min-h-[300px] grid grid-cols-2 gap-x-8 gap-y-6 content-start">
                                 <!-- Fields go here -->
-                                <div class="col-span-2 text-center text-gray-400 py-10">Start by dropping fields here...</div>
+                                <div class="col-span-2 flex flex-col items-center justify-center py-20 text-gray-300 gap-4 border-2 border-dashed border-gray-100 rounded-xl m-4">
+                                    <span class="material-icons text-4xl">add_circle_outline</span>
+                                    <span>Drag fields here to start designing</span>
+                                </div>
                             </div>
 
                             <!-- Actions Footer -->
-                            <div class="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50 rounded-b-xl">
-                                <div class="h-9 w-20 bg-gray-200 rounded opacity-60"></div>
-                                <div class="h-9 w-20 bg-blue-200 rounded opacity-60"></div>
+                            <div class="p-6 border-t border-gray-50 flex justify-end gap-3 bg-gray-50/30 rounded-b-[24px] backdrop-blur-sm">
+                                <div class="h-9 w-24 bg-gray-200 rounded-lg opacity-40"></div>
+                                <div class="h-9 w-24 bg-blue-100 rounded-lg opacity-40"></div>
                             </div>
                         </div>
-                        <div class="mt-4 text-xs text-gray-400">
-                            Drag fields from the left to add. Drag fields here to reorder.
+                        <div class="mt-8 text-sm text-gray-400 font-medium">
+                            Designed for macOS & iOS
                         </div>
                     </div>
                  </div>
@@ -293,12 +333,16 @@
              const icon = obj.icon || 'cube';
              
              container.innerHTML = `
-                <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-                    <span class="material-icons text-xl">${icon.substring(0,2)}</span>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 ring-1 ring-white/20">
+                    <span class="material-icons text-2xl">${icon.substring(0,2)}</span>
                 </div>
                 <div>
-                    <h1 class="text-lg font-semibold text-gray-900">${label}</h1>
-                    <p class="text-xs text-gray-500">New Record</p>
+                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight leading-tight">${label}</h1>
+                    <div class="flex items-center gap-2 text-sm font-medium text-gray-500">
+                        <span>New Record</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span class="text-xs text-gray-400 font-normal uppercase tracking-wide">Standard Layout</span>
+                    </div>
                 </div>
              `;
         }
@@ -332,10 +376,10 @@
 
             if (field.type === 'section') {
                 return `
-                <div class="${colSpanClass} p-3 rounded-lg hover:bg-blue-50 group border border-transparent hover:border-blue-100 cursor-move transition-colors relative mt-2" data-id="${key}">
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                        <h3 class="text-lg font-semibold text-gray-800">${label}</h3>
-                         <button class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity" title="Delete" onclick="deleteField('${key}')">
+                <div class="${colSpanClass} p-4 rounded-xl hover:bg-white hover:shadow-md group border border-transparent hover:border-blue-100 cursor-move transition-all duration-200 relative mt-4 group" data-id="${key}">
+                    <div class="flex justify-between items-end border-b-2 border-gray-100 pb-2">
+                        <h3 class="text-xl font-bold text-gray-800 tracking-tight">${label}</h3>
+                         <button class="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete" onclick="deleteField('${key}')">
                             <span class="material-icons text-sm">delete</span>
                         </button>
                     </div>
@@ -344,37 +388,38 @@
             }
            
             let inputHtml = '';
-            // Simplified read-only representation for designer
+            // Simplified read-only representation for designer - Apple style inputs
+            const commonInputClass = "w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3 transition-colors group-hover:bg-white group-hover:border-blue-200/50 group-hover:shadow-sm";
+
             switch (field.type) {
                 case 'textarea':
                 case 'code':
                 case 'html':
                 case 'markdown':
-                    inputHtml = `<div class="w-full h-24 rounded-lg border border-gray-300 bg-gray-50"></div>`;
+                    inputHtml = `<div class="${commonInputClass} h-24"></div>`;
                     break;
                 case 'boolean':
-                    inputHtml = `<div class="flex items-center gap-2 h-9"><div class="w-4 h-4 border border-gray-300 rounded bg-gray-50"></div><span class="text-sm text-gray-500">Checkbox</span></div>`;
+                    inputHtml = `<div class="flex items-center gap-2 h-10"><div class="w-5 h-5 border border-gray-300 rounded bg-white shadow-sm flex items-center justify-center"></div><span class="text-sm text-gray-600">Checkbox</span></div>`;
                     break;
                 case 'select':
-                    inputHtml = `<div class="w-full h-9 rounded-lg border border-gray-300 bg-gray-50 flex items-center px-3 justify-between"><span class="text-sm text-gray-400">Select...</span><span class="material-icons text-gray-400 text-sm">arrow_drop_down</span></div>`;
+                    inputHtml = `<div class="${commonInputClass} h-10 flex items-center justify-between"><span class="text-sm text-gray-400">Select...</span><span class="material-icons text-gray-400 text-sm">unfold_more</span></div>`;
                     break;
                 case 'lookup':
                 case 'master_detail':
-                    inputHtml = `<div class="w-full h-9 rounded-lg border border-gray-300 bg-gray-50 flex items-center px-3 justify-between">
-                        <span class="text-sm text-gray-400">Search ${field.reference_to || 'records'}...</span>
-                        <span class="material-icons text-gray-400 text-sm">search</span>
+                    inputHtml = `<div class="${commonInputClass} h-10 flex items-center justify-between">
+                        <span class="text-sm text-gray-400 flex items-center gap-1"><span class="material-icons text-xs text-blue-500">search</span> Search ${field.reference_to || 'records'}...</span>
                     </div>`;
                     break;
                 default: 
-                    inputHtml = `<div class="w-full h-9 rounded-lg border border-gray-300 bg-gray-50"></div>`;
+                    inputHtml = `<div class="${commonInputClass} h-10"></div>`;
             }
 
             return `
-                <div class="${colSpanClass} field-item p-3 -mx-3 rounded-lg hover:bg-blue-50 group border border-transparent hover:border-blue-100 cursor-move transition-colors relative" data-id="${key}">
-                    <div class="mb-1 flex justify-between items-center">
-                        <label class="block text-sm font-medium text-gray-700">${label} ${required}</label>
-                         <button class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity" title="Delete" onclick="deleteField('${key}')">
-                            <span class="material-icons text-sm">delete</span>
+                <div class="${colSpanClass} field-item p-3 -mx-3 rounded-xl hover:bg-blue-50/30 group border border-transparent hover:border-blue-200/30 cursor-move transition-all duration-200 relative" data-id="${key}">
+                    <div class="mb-1.5 flex justify-between items-center px-0.5">
+                        <label class="block text-sm font-medium text-gray-600 tracking-tight">${label} ${required}</label>
+                         <button class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all" title="Delete" onclick="deleteField('${key}')">
+                            <span class="material-icons text-sm">close</span>
                         </button>
                     </div>
                     ${inputHtml}
