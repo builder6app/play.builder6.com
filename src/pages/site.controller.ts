@@ -10,11 +10,11 @@ export class SiteController {
     private readonly projectService: ProjectService,
   ) {}
 
-  private async resolveProject(slugOrId: string) {
-    let project = await this.projectService.findBySlug(slugOrId);
+  private async resolveProject(projectSlug: string) {
+    let project = await this.projectService.findBySlug(projectSlug);
     if (!project) {
       try {
-        project = await this.projectService.findOne(slugOrId);
+        project = await this.projectService.findOne(projectSlug);
       } catch (e) {
         // Ignore
       }
@@ -25,9 +25,9 @@ export class SiteController {
     return project;
   }
 
-  @All(':projectId/:pageId/preview')
+  @All(':projectSlug/:pageId/preview')
   async getPreview(
-    @Param('projectId') projectId: string,
+    @Param('projectSlug') projectSlug: string,
     @Param('pageId') pageId: string,
     @Body() body: any,
     @Res() res: Response,
@@ -48,9 +48,9 @@ export class SiteController {
     return res.render('pages/preview', { page });
   }
 
-  @Get(':slug')
-  async getHome(@Param('slug') slug: string, @Res() res: Response) {
-    const project = await this.resolveProject(slug);
+  @Get(':projectSlug')
+  async getHome(@Param('projectSlug') projectSlug: string, @Res() res: Response) {
+    const project = await this.resolveProject(projectSlug);
 
     if (!project.homePage) {
       return res.status(404).send('This project does not have a home page set.');
@@ -63,18 +63,19 @@ export class SiteController {
 
     const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
-    const editUrl = `/app/${project._id}/${page._id}`;
+    const projectSlugOrId = project.slug || project._id;
+    const editUrl = `/app/${projectSlugOrId}/${page._id}`;
 
     return res.render('pages/site', { page, project, navPages, editUrl });
   }
 
-  @Get(':slug/p/:pageId')
+  @Get(':projectSlug/p/:pageId')
   async getPageById(
-    @Param('slug') slug: string,
+    @Param('projectSlug') projectSlug: string,
     @Param('pageId') pageId: string,
     @Res() res: Response,
   ) {
-    const project = await this.resolveProject(slug);
+    const project = await this.resolveProject(projectSlug);
 
     const page = await this.PageService.findOne(pageId);
     if (!page || page.projectId !== project._id) {
@@ -83,18 +84,19 @@ export class SiteController {
 
     const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
-    const editUrl = `/app/${project._id}/${page._id}`;
+    const projectSlugOrId = project.slug || project._id;
+    const editUrl = `/app/${projectSlugOrId}/${page._id}`;
 
     return res.render('pages/site', { page, project, navPages, editUrl });
   }
 
-  @Get(':slug/:path')
+  @Get(':projectSlug/:path')
   async getPage(
-    @Param('slug') slug: string,
+    @Param('projectSlug') projectSlug: string,
     @Param('path') path: string,
     @Res() res: Response,
   ) {
-    const project = await this.resolveProject(slug);
+    const project = await this.resolveProject(projectSlug);
 
     // 1. Try to find by path
     let page = await this.PageService.findByPath(project._id!, path);
@@ -117,7 +119,8 @@ export class SiteController {
 
     const pages = await this.PageService.findAllByProject(project._id!);
     const navPages = pages.filter(p => p.addToNavigation);
-    const editUrl = `/app/${project._id}/${page._id}`;
+    const projectSlugOrId = project.slug || project._id;
+    const editUrl = `/app/${projectSlugOrId}/${page._id}`;
 
     return res.render('pages/site', { page, project, navPages, editUrl });
   }

@@ -48,8 +48,8 @@ export class ProjectController {
       return res.render('projects/new', { user: session.user });
   }
 
-  @Get(':id')
-  async show(@Req() req: Request, @Param('id') idOrSlug: string, @Res() res: Response) {
+  @Get(':projectSlug')
+  async show(@Req() req: Request, @Param('projectSlug') projectSlug: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
@@ -57,7 +57,7 @@ export class ProjectController {
       return res.redirect('/login');
     }
     
-    const project = await this.projectService.resolve(idOrSlug);
+    const project = await this.projectService.resolve(projectSlug);
     if (!project) {
        // Should render a 404 page or redirect
        return res.redirect('/app');
@@ -71,8 +71,8 @@ export class ProjectController {
     return res.render('projects/show', { project, pages, objects, user: session.user });
   }
 
-  @Get(':id/settings')
-  async settings(@Req() req: Request, @Param('id') idOrSlug: string, @Res() res: Response) {
+  @Get(':projectSlug/settings')
+  async settings(@Req() req: Request, @Param('projectSlug') projectSlug: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
@@ -80,7 +80,7 @@ export class ProjectController {
       return res.redirect('/login');
     }
 
-    const project = await this.projectService.resolve(idOrSlug);
+    const project = await this.projectService.resolve(projectSlug);
     if (!project) {
         return res.redirect('/app');
     }
@@ -91,13 +91,13 @@ export class ProjectController {
     return res.render('projects/settings', { project, pages, user: session.user });
   }
 
-  @Get(':projectId/:pageId')
-  async editPage(@Req() req: Request, @Param('projectId') projectIdOrSlug: string, @Param('pageId') pageId: string, @Res() res: Response) {
+  @Get(':projectSlug/:pageId')
+  async editPage(@Req() req: Request, @Param('projectSlug') projectSlug: string, @Param('pageId') pageId: string, @Res() res: Response) {
     const session = await this.authService.auth.api.getSession({
       headers: new Headers(req.headers as any),
     });
 
-    const project = await this.projectService.resolve(projectIdOrSlug);
+    const project = await this.projectService.resolve(projectSlug);
     if (!project) {
        return res.redirect('/app');
     }

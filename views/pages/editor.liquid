@@ -201,7 +201,7 @@
             <div class="p-6 flex items-center justify-between">
                 <div class="flex flex-col overflow-hidden">
                     <h1 class="font-bold text-white truncate text-xl tracking-tight" title="{{ project.name }}">{{ project.name }}</h1>
-                    <div class="text-xs text-gray-500 truncate mt-1">/app/{{ project._id }}</div>
+                    <div class="text-xs text-gray-500 truncate mt-1">/app/{{ project.slug | default: project._id }}</div>
                 </div>
                 <div class="flex items-center gap-1">
                     <button id="openProjectSettings" class="text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-white/10 flex-shrink-0" title="Project Settings">
@@ -223,7 +223,7 @@
                     <div class="drag-handle p-1 cursor-grab opacity-0 group-hover:opacity-100 transition-opacity mr-1 text-white/50 hover:text-white" title="Drag to reorder">
                         <i class="ri-draggable"></i>
                     </div>
-                    <a href="/app/{{ project._id }}/{{ p._id }}" class="flex-1 truncate flex items-center gap-2">
+                    <a href="/app/{{ project.slug | default: project._id }}/{{ p._id }}" class="flex-1 truncate flex items-center gap-2">
                         <span>{{ p.name | default: "Untitled Page" }}</span>
                         {% if p.homePage == p._id %}<span class="text-xs opacity-70" title="Home Page">🏠</span>{% endif %}
                     </a>
@@ -510,7 +510,8 @@
             // 优先使用真实路由预览
             if (currentPageId && window.PROJECT_ID) {
                 // 使用 Form Post 方式刷新 iframe，确保 window context 重置，支持 const/let 重复运行
-                const targetUrl = `/site/${window.PROJECT_ID}/${currentPageId}/preview`;
+                const projectIdentifier = window.PROJECT_SLUG || window.PROJECT_ID;
+                const targetUrl = `/site/${projectIdentifier}/${currentPageId}/preview`;
                 
                 let form = document.getElementById('previewForm');
                 if (!form) {
@@ -856,8 +857,9 @@
 
                     // 2. 更新 URL
                     const projectId = window.PROJECT_ID || (window.PAGE && window.PAGE.projectId);
-                    if (projectId) {
-                        const newPath = '/app/' + projectId + '/' + data._id;
+                    const projectSlug = window.PROJECT_SLUG || projectId;
+                    if (projectSlug) {
+                        const newPath = '/app/' + projectSlug + '/' + data._id;
                         window.history.pushState(null, '', newPath);
                     }
                     
@@ -1088,7 +1090,8 @@
                 });
                 if (response.ok) {
                     const page = await response.json();
-                    window.location.href = '/app/' + projectId + '/' + page._id;
+                    const projectSlug = window.PROJECT_SLUG || projectId;
+                    window.location.href = '/app/' + projectSlug + '/' + page._id;
                 } else {
                     $notify('Failed to create page', 'error');
                 }

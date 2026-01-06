@@ -322,6 +322,7 @@
         const isNew = {{ isNew | default: false }};
         const objectId = "{{ object._id }}";
         const projectId = "{{ projectId }}";
+        const projectSlug = "{{ project.slug | default: projectId }}";
         const initialSchema = {{ object.schema | json | default: "''" }};
 
         let editor;
@@ -749,7 +750,7 @@
             };
 
             try {
-                const url = isNew ? `/app/${projectId}/objects` : `/app/${projectId}/objects/${objectId}`;
+                const url = isNew ? `/app/${projectSlug}/objects` : `/app/${projectSlug}/objects/${objectId}`;
                 const method = isNew ? 'POST' : 'PUT';
                 
                 const response = await fetch(url, {
@@ -766,7 +767,7 @@
                 
                 if (isNew) {
                      setTimeout(() => {
-                        window.location.href = `/app/${projectId}/objects/${savedObj._id}`;
+                        window.location.href = `/app/${projectSlug}/objects/${savedObj._id}`;
                     }, 500);
                 }
             } catch (error) {

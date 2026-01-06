@@ -9,7 +9,7 @@
     {% render 'partials/header.liquid', is_editor: false, user: user %}
     {% render 'partials/notifications.liquid' %}
 
-    <main class="flex-1 container mx-auto px-6 py-8 max-w-5xl" x-data="projectShow('{{ project._id }}')">
+    <main class="flex-1 container mx-auto px-6 py-8 max-w-5xl" x-data="projectShow('{{ project._id }}', '{{ project.slug | default: project._id }}')">
         <!-- Breadcrumb -->
         <nav class="flex items-center text-sm text-gray-400 mb-6">
             <a href="/app" class="hover:text-white transition-colors">Projects</a>
@@ -109,7 +109,7 @@
 
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('projectShow', (projectId) => ({
+        Alpine.data('projectShow', (projectId, projectSlug) => ({
             defaultCode: `<div class="min-h-screen bg-[#000000] flex items-center justify-center font-sans antialiased">
   <div class="w-80 bg-[#1c1c1e] rounded-[2rem] p-6 shadow-2xl border border-white/10 relative overflow-hidden">
     <!-- Background Blur Blob -->
@@ -152,7 +152,8 @@
                     });
                     if (response.ok) {
                         const page = await response.json();
-                        window.location.href = '/app/' + projectId + '/' + page._id;
+                        const pSlug = projectSlug || projectId;
+                        window.location.href = '/app/' + pSlug + '/' + page._id;
                     } else {
                         $notify('Failed to create page', 'error');
                     }
