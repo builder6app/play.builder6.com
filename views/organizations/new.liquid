@@ -7,68 +7,63 @@
         <p class="text-gray-400">Create a new organization to collaborate with your team.</p>
     </div>
 
-    <form id="createOrgForm" class="space-y-6 bg-[#1c1c1e] p-8 rounded-2xl border border-white/10 shadow-xl">
-        <div class="space-y-2">
-            <label for="name" class="block text-sm font-medium text-gray-400 uppercase tracking-wider">Organization Name</label>
-            <input type="text" id="name" name="name" required 
-                class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                placeholder="My Company">
-        </div>
+    <div x-data="createOrgForm">
+        <form @submit.prevent="submit" class="space-y-6 bg-[#1c1c1e] p-8 rounded-2xl border border-white/10 shadow-xl">
+            <div class="space-y-2">
+                <label for="name" class="block text-sm font-medium text-gray-400 uppercase tracking-wider">Organization Name</label>
+                <input type="text" id="name" x-model="name" @input="updateSlug" required 
+                    class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                    placeholder="My Company">
+            </div>
 
-        <div class="space-y-2">
-            <label for="slug" class="block text-sm font-medium text-gray-400 uppercase tracking-wider">Slug</label>
-            <input type="text" id="slug" name="slug" required 
-                class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
-                placeholder="my-company">
-            <p class="text-xs text-gray-500">A unique identifier for your organization URL.</p>
-        </div>
+            <div class="space-y-2">
+                <label for="slug" class="block text-sm font-medium text-gray-400 uppercase tracking-wider">Slug</label>
+                <input type="text" id="slug" x-model="slug" required 
+                    class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-mono"
+                    placeholder="my-company">
+                <p class="text-xs text-gray-500">A unique identifier for your organization URL.</p>
+            </div>
 
-        <div class="pt-4 flex items-center justify-end gap-3">
-            <a href="/org" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">Cancel</a>
-            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-900/20">
-                Create Organization
-            </button>
-        </div>
-    </form>
+            <div class="pt-4 flex items-center justify-end gap-3">
+                <a href="/org" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">Cancel</a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-900/20">
+                    Create Organization
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-    const nameInput = document.getElementById('name');
-    const slugInput = document.getElementById('slug');
-    
-    // Auto-generate slug
-    nameInput.addEventListener('input', (e) => {
-        const val = e.target.value;
-        // Only update slug if user hasn't manually edited it much (heuristic)
-        // Or just simplify: always suggest unless manually focused? 
-        // Simple logic:
-        const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-        slugInput.value = slug;
-    });
-
-    document.getElementById('createOrgForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-        
-        try {
-            const res = await fetch('/api/auth/organization/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('createOrgForm', () => ({
+            name: '',
+            slug: '',
             
-            if (res.ok) {
-                // Determine redirect. Maybe to the new org settings or dashboard
-                window.location.href = '/org';
-            } else {
-                const error = await res.json();
-                alert(error.message || 'Failed to create organization');
+            updateSlug() {
+                 this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            },
+
+            async submit() {
+                try {
+                    const res = await fetch('/api/auth/organization/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: this.name, slug: this.slug })
+                    });
+                    
+                    if (res.ok) {
+                        window.location.href = '/org';
+                    } else {
+                        const error = await res.json();
+                        alert(error.message || 'Failed to create organization');
+                    }
+                } catch (err) {
+                     console.error(err);
+                     alert('An error occurred');
+                }
             }
-        } catch (err) {
-            console.error(err);
-            alert('An error occurred');
-        }
-    });
+        }))
+    })
 </script>
 {% endblock %}

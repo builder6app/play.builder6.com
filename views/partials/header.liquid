@@ -1,4 +1,4 @@
-<header class="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl z-50 {% unless is_editor %}sticky top-0{% endunless %}">
+<header class="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-[#1c1c1e]/80 backdrop-blur-xl z-50 {% unless is_editor %}sticky top-0{% endunless %}" x-data="header">
     <div class="flex items-center gap-3">
         <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/app'">
             <img src="/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
@@ -6,9 +6,9 @@
         </div>
         
         <div class="hidden md:flex items-center gap-1 ml-4 pl-4 border-l border-white/10 h-6">
-            <span class="px-3 py-1.5 text-sm font-medium text-gray-300">
+            <span class="px-3 py-1.5 text-sm font-medium text-gray-300" x-text="activeOrgId && orgMap[activeOrgId] ? orgMap[activeOrgId] : 'Personal Workspace'">
                 {% if user.activeOrganizationId %}
-                    Organization: {{ user.activeOrganizationId }} <!-- Ideally resolve name server-side or via JS -->
+                    {{ user.activeOrganizationId }}
                 {% else %}
                     Personal Workspace
                 {% endif %}
@@ -22,7 +22,11 @@
             <a href="/login" id="signInBtn" class="{% if user %}hidden{% endif %} text-gray-300 hover:text-white text-sm font-medium transition-colors">Sign In</a>
 
             <!-- User Menu Trigger (Visible if user exists) -->
-            <button id="userMenuBtn" class="{% unless user %}hidden{% endunless %} flex items-center gap-2 group focus:outline-none">
+            <button
+                id="userMenuBtn"
+                class="{% unless user %}hidden{% endunless %} flex items-center gap-2 group focus:outline-none"
+                @click="open = !open"
+            >
                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold shadow-inner ring-2 ring-transparent group-hover:ring-white/20 transition-all">
                     <span id="userAvatar">{{ user.name | slice: 0, 1 | upcase | default: 'U' }}</span>
                 </div>
@@ -31,13 +35,39 @@
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-[#1c1c1e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-white/5 backdrop-blur-xl transform origin-top-right transition-all">
+            <div
+                id="userDropdown"
+                class="absolute right-0 top-full mt-2 w-64 bg-[#1c1c1e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 ring-1 ring-white/5 backdrop-blur-xl transform origin-top-right transition-all"
+                x-show="open"
+                @click.away="open = false"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="transform opacity-0 scale-95"
+                x-transition:enter-end="transform opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="transform opacity-100 scale-100"
+                x-transition:leave-end="transform opacity-0 scale-95"
+                style="display: none;"
+            >
                 <div class="p-1">
                     <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Switch Workspace
                     </div>
                     <div id="orgList" class="space-y-1 mb-2">
-                        <!-- Org items will be injected here -->
+                        <template x-for="org in orgs" :key="org.id">
+                            <button
+                                class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors text-left"
+                                :class="org.id === activeOrgId ? 'bg-blue-500/20 text-blue-300' : 'text-gray-300 hover:bg-white/10 hover:text-white'"
+                                @click="switchOrganization(org.id)"
+                            >
+                                <span class="truncate" x-text="org.name"></span>
+                                <template x-if="org.id === activeOrgId">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </template>
+                            </button>
+                        </template>
+                        <template x-if="orgs.length === 0">
+                             <div class="px-3 py-2 text-xs text-gray-500 italic">No organizations</div>
+                        </template>
                     </div>
                     <div class="h-px bg-white/10 my-1 mx-2"></div>
                     <a href="/org" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
@@ -45,7 +75,7 @@
                         Manage Organizations
                     </a>
                     <div class="h-px bg-white/10 my-1 mx-2"></div>
-                    <button id="signOutBtn" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors text-left">
+                    <button @click="signOut" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-colors text-left">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         Sign Out
                     </button>
@@ -54,121 +84,63 @@
         </div>
     </div>
 </header>
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const userMenuBtn = document.getElementById('userMenuBtn');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        // Initial load of org name
-        loadOrganizations();
-        
-        if (userMenuBtn && userDropdown) {
-            userMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                userDropdown.classList.toggle('hidden');
-                if (!userDropdown.classList.contains('hidden')) {
-                    loadOrganizations();
-                }
-            });
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (userDropdown && !userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
-                userDropdown.classList.add('hidden');
-            }
-        });
-
-        // Organization Management
-        const orgList = document.getElementById('orgList');
-        let activeOrgId = null;
-        let orgMap = {};
-
-        async function loadOrganizations() {
-            try {
-                // Fetch session to get active org
-                const sessionRes = await fetch('/api/auth/get-session');
-                const sessionData = await sessionRes.json();
-                activeOrgId = sessionData.session?.activeOrganizationId;
-
-                // Fetch org list
-                const orgRes = await fetch('/api/auth/organization/list');
-                if (!orgRes.ok) return;
-                const orgs = await orgRes.json();
-                
-                orgMap = {};
-                orgs.forEach(o => orgMap[o.id] = o.name);
-                
-                // Update header text if possible
-                const headerOrgLabel = document.querySelector('.hidden.md\\:flex span');
-                if (headerOrgLabel) {
-                    if (activeOrgId && orgMap[activeOrgId]) {
-                        headerOrgLabel.innerText = orgMap[activeOrgId];
-                    } else if (!activeOrgId) {
-                         headerOrgLabel.innerText = "Personal Workspace";
-                    }
-                }
-
-                renderOrgs(orgs);
-            } catch (err) {
-                console.error('Failed to load organizations', err);
-            }
-        }
-
-        function renderOrgs(orgs) {
-            if (!orgList) return;
-            orgList.innerHTML = '';
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('header', () => ({
+            open: false,
+            orgs: [],
+            activeOrgId: null,
+            orgMap: {},
             
-            if (orgs.length === 0) {
-                orgList.innerHTML = '<div class="px-3 py-2 text-xs text-gray-500 italic">No organizations</div>';
-                return;
-            }
+            async init() {
+                await this.loadOrganizations();
+            },
 
-            orgs.forEach(org => {
-                const isActive = org.id === activeOrgId;
-                const btn = document.createElement('button');
-                btn.className = `w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors text-left ${isActive ? 'bg-blue-500/20 text-blue-300' : 'text-gray-300 hover:bg-white/10 hover:text-white'}`;
-                btn.innerHTML = `
-                    <span class="truncate">${org.name}</span>
-                    ${isActive ? '<svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                `;
-                btn.onclick = () => switchOrganization(org.id);
-                orgList.appendChild(btn);
-            });
-        }
-
-        async function switchOrganization(orgId) {
-            if (orgId === activeOrgId) return;
-            try {
-                const res = await fetch('/api/auth/organization/set-active', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ organizationId: orgId })
-                });
-                
-                if (res.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to switch organization');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error switching organization');
-            }
-        }
-
-        // Handle Sign Out for non-SPA pages (like my-snippets)
-        const signOutBtn = document.getElementById('signOutBtn');
-        if (signOutBtn) {
-            signOutBtn.addEventListener('click', async () => {
+            async loadOrganizations() {
                 try {
+                    const sessionRes = await fetch('/api/auth/get-session');
+                    const sessionData = await sessionRes.json();
+                    this.activeOrgId = sessionData.session?.activeOrganizationId;
+
+                    const orgRes = await fetch('/api/auth/organization/list');
+                    if (!orgRes.ok) return;
+                    this.orgs = await orgRes.json();
+                    
+                    this.orgMap = {};
+                    this.orgs.forEach(o => this.orgMap[o.id] = o.name);
+                } catch (err) {
+                    console.error('Failed to load organizations', err);
+                }
+            },
+
+            async switchOrganization(orgId) {
+                if (orgId === this.activeOrgId) return;
+                try {
+                    const res = await fetch('/api/auth/organization/set-active', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ organizationId: orgId })
+                    });
+                    
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to switch organization');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error switching organization');
+                }
+            },
+
+            async signOut() {
+                 try {
                     await fetch('/api/auth/sign-out', { method: 'POST' });
                     window.location.href = '/';
                 } catch (e) {
                     console.error(e);
                 }
-            });
-        }
-    });
+            }
+        }))
+    })
 </script>
