@@ -9,7 +9,10 @@ async function bootstrap() {
     AppModule,
   );
 
-  const engine = new Liquid();
+  const engine = new Liquid({
+    root: join(__dirname, '..', 'views'),
+    extname: '.liquid',
+  });
   app.engine('liquid', engine.express());
   app.setViewEngine('liquid');
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
@@ -27,7 +30,10 @@ export default async (req: any, res: any) => {
     AppModule,
   );
 
-  const engine = new Liquid();
+  const engine = new Liquid({
+    root: join(__dirname, '..', 'views'),
+    extname: '.liquid',
+  });
   app.engine('liquid', engine.express());
   app.setViewEngine('liquid');
   app.setBaseViewsDir(join(__dirname, '..', 'views'));

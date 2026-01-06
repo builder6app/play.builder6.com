@@ -1,0 +1,73 @@
+{% layout 'app' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Organizations</h1>
+            <p class="text-gray-400">Manage your organizations and teams.</p>
+        </div>
+        <a href="/org/new" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Create Organization
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for org in organizations %}
+        <div class="bg-[#1c1c1e] rounded-2xl border border-white/10 p-6 shadow-lg hover:border-white/20 transition-all group relative">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center text-xl font-bold text-white shadow-inner">
+                    {{ org.name | slice: 0, 1 | upcase }}
+                </div>
+                <!-- Dropdown or Actions -->
+                <a href="/org/{{ org.slug }}/settings" class="text-gray-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </a>
+            </div>
+            
+            <h3 class="text-xl font-bold text-white mb-1 truncate">{{ org.name }}</h3>
+            <p class="text-sm text-gray-500 font-mono mb-6 truncate">/{{ org.slug }}</p>
+
+            <div class="flex items-center gap-3">
+                <button onclick="switchOrg('{{ org.id }}')" class="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors border border-white/5">
+                    Switch to Workspace
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-gray-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </div>
+            <h3 class="text-lg font-medium text-white mb-2">No organizations yet</h3>
+            <p class="text-gray-500 mb-6">Create your first organization to get started.</p>
+            <a href="/org/new" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors">
+                Create Organization
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+async function switchOrg(orgId) {
+    try {
+        const res = await fetch('/api/auth/organization/set-active', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organizationId: orgId })
+        });
+        
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            alert('Failed to switch organization');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error switching organization');
+    }
+}
+</script>
+{% endblock %}
