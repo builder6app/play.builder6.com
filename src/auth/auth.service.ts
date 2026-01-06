@@ -73,7 +73,20 @@ export class AuthService implements OnModuleInit {
                     await this.db.collection('space_users').insertOne(member as any);
                 }
             }
-        }
+        },
+        session: {
+            create: {
+                before: async (session) => {
+                    if (!(session as any).activeOrganizationId) {
+                        const member = await this.db.collection('space_users').findOne({ userId: session.userId });
+                        if (member) {
+                            (session as any).activeOrganizationId = member.organizationId;
+                        }
+                    }
+                    return session;
+                },
+            },
+        },
       },
       user: {
         modelName: 'users',
