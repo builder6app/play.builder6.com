@@ -1114,25 +1114,64 @@
             try {
                 const currentCode = editor ? editor.getValue() : '';
                 const model = document.getElementById('aiModelSelect').value;
-                const response = await fetch('/api/ai/generate', {
+                
+                // Use streaming endpoint
+                const response = await fetch('/api/ai/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt, currentCode, model, type: 'object' })
                 });
 
-                const data = await response.json();
                 document.getElementById(loadingId).remove();
 
-                if (response.ok && data.code) {
-                    addMessage('ai', 'I have updated the Object schema based on your request.');
-                    editor.setValue(data.code);
-                } else {
-                    addMessage('ai', 'Sorry, something went wrong: ' + (data.message || 'Unknown error'));
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.message || 'Unknown error');
                 }
+
+                const contentType = response.headers.get('content-type');
+                let finalCode = '';
+
+                if (contentType && contentType.includes('application/json')) {
+                    // Handle Legacy/Non-streaming JSON response
+                    const data = await response.json();
+                    finalCode = data.code;
+                } else {
+                    // Handle Streaming response
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    // Show generating state
+                    const loadingTextDiv = document.createElement('div');
+                    loadingTextDiv.className = 'flex gap-3';
+                    loadingTextDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-xs flex-shrink-0">AI</div>
+                        <div class="bg-white/10 rounded-2xl rounded-tl-none px-4 py-2 text-sm text-gray-200">
+                           Generating Object Schema...
+                        </div>
+                    `;
+                    aiChatMessages.appendChild(loadingTextDiv);
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, { stream: true });
+                        finalCode += chunk;
+                    }
+                    loadingTextDiv.remove();
+                }
+
+                if (finalCode) {
+                    addMessage('ai', 'I have updated the Object schema based on your request.');
+                    editor.setValue(finalCode);
+                } else {
+                    addMessage('ai', 'Sorry, the AI returned an empty response.');
+                }
+
             } catch (e) {
                 console.error(e);
                 if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                addMessage('ai', 'Sorry, I encountered a network error.');
+                addMessage('ai', 'Sorry, I encountered a network error: ' + e.message);
             }
         }
 

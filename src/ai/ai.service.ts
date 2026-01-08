@@ -81,6 +81,49 @@ export class AiService {
     return { code: content };
   }
 
+  async generateCodeStream(prompt: string, currentCode?: string, model?: string, type: 'page' | 'object' = 'page') {
+    if (type === 'object') {
+      // Reuse existing object generation (non-streaming for now, or implement if needed)
+      // Since the return type of generateCode is {code}, and this returns a stream, 
+      // we should probably just support page generation here or implement stream for object.
+      // Let's stick to page generation structure for now.
+      const result = await this.generateObjectDefinition(prompt, model, currentCode);
+      // Create a mock stream for consistency if needed, but better to just throw or handle elsewhere.
+      // For this task, I'll implement the Page streaming logic.
+    }
+
+    const systemPrompt = `You are an expert web developer and UI designer. 
+    Your task is to generate or modify HTML/Tailwind CSS code based on the user's request.
+    
+    If 'currentCode' is provided, you should modify it according to the user's instructions.
+    If 'currentCode' is not provided, you should generate a new page from scratch.
+
+    Tech Stack & Environment:
+    - Styling: Tailwind CSS (CDN loaded).
+    - Icons: Remix Icon (CDN loaded, e.g. <i class="ri-home-line"></i>).
+    - Interactivity: Alpine.js (CDN loaded, e.g. x-data="{ open: false }").
+
+    Important Constraints:
+    - The page is rendered inside a layout that ALREADY contains a sidebar/header navigation. DO NOT regenerate the main navigation menu or sidebar. Focus on the specific page content.
+    - If generating a full page, you can include <html>, <head>, <body> tags. The system will automatically process specific layout adjustments.
+    
+    Return ONLY the HTML code. Do not include markdown backticks or explanations.
+    `;
+
+    const userMessage = currentCode 
+      ? `Current Code:\n${currentCode}\n\nUser Request: ${prompt}`
+      : `User Request: ${prompt}`;
+
+    return await this.openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      model: model || this.defaultModel,
+      stream: true,
+    });
+  }
+
   async getModels() {
     if (this.models && this.models.length > 0) return this.models;
     

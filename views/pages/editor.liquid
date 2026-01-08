@@ -1167,25 +1167,55 @@
             try {
                 const currentCode = editor.getValue();
                 const model = document.getElementById('aiModelSelect').value;
-                const response = await fetch('/api/ai/generate', {
+                
+                // Use streaming endpoint to prevent timeouts
+                const response = await fetch('/api/ai/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, currentCode, model })
+                    body: JSON.stringify({ prompt, currentCode, model, type: 'page' })
                 });
 
-                const data = await response.json();
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Unknown error');
+                }
+
+                // Stream reading
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullCode = '';
+                
+                // Update loading message to show progress
+                const loadingText = loadingDiv.querySelector('div.bg-white\\/10 > span:first-child');
+                if (loadingText) loadingText.textContent = 'Generating...';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullCode += chunk;
+                    
+                    // Optional: Update UI to show activity (e.g. byte count)
+                    if (loadingText) {
+                        loadingText.textContent = `Generating... (${fullCode.length} chars)`;
+                    }
+                }
+
                 document.getElementById(loadingId).remove();
 
-                if (response.ok && data.code) {
+                if (fullCode) {
                     addMessage('ai', 'I have updated the code based on your request.');
-                    editor.setValue(data.code);
+                    editor.setValue(fullCode);
                 } else {
-                    addMessage('ai', 'Sorry, something went wrong: ' + (data.message || 'Unknown error'));
+                    addMessage('ai', 'Sorry, the AI returned an empty response.');
                 }
+
             } catch (e) {
                 console.error(e);
-                document.getElementById(loadingId).remove();
-                addMessage('ai', 'Sorry, I encountered a network error.');
+                const el = document.getElementById(loadingId);
+                if (el) el.remove();
+                addMessage('ai', 'Sorry, something went wrong: ' + e.message);
             }
         }
 
